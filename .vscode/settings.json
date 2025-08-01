@@ -1,0 +1,12 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "cstdlib": "c",
+        "hashtable.h": "c",
+        "preassembler.h": "c",
+        "macrotable..h": "c",
+        "typeinfo": "c",
+        "stdio.h": "c",
+        "labeltable.h": "c"
+    }
+}
