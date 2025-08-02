@@ -3,8 +3,8 @@
 
 
 void initialLabelTable () {
-    int i = 0;
-    for (i, i<LABEL_HASH_SIZE; i++){
+    int i;
+    for (i = 0; i<LABEL_HASH_SIZE; i++){
         label_table[i] = NULL;
     }
 }
@@ -19,32 +19,56 @@ unsigned int hashLabel (const char* str) {
 }
 
 void insertLabelToTbl (const char* name) {
+    unsigned int hashVal;
     Label *ancestor;
-    Label *new_label = malloc(sizeof(MAX_LABEL_LEN));
+    Label *new_label = malloc(sizeof(Label));
     if (!new_label) {
         perror("malloc");
+        return;
     }
-    int hashVal = hashLabel(name);
+    new_label->name = malloc(strlen(name) + 1);
+    if (!new_label->name) {
+        perror("malloc");
+        free(new_label);
+        return;
+    }
+    strcpy(new_label->name, name);
+    new_label->next = NULL;
+    
+    hashVal = hashLabel(name);
     if (label_table[hashVal] == NULL) {
         label_table[hashVal] = new_label;
     } else {
         ancestor = label_table[hashVal];
-        while (ancestor->next !=NULL)
-            {
-                ancestor = ancestor->next;
-            }
-            ancestor->next = new_label;
-            new_label->name = name;
+        while (ancestor->next !=NULL) {ancestor = ancestor->next;}
+        ancestor->next = new_label;
     }
+    
 }
 
-Label checkLabelExcist(char *word){
-    int hash_val = hashLabel(word);
-    Label *label = label_table[hash_val];
-    while (strcmp((label->name), word != 0))
+Label* checkLabelExist(char *word){
+    unsigned int hash_val;
+    Label *label;
+    hash_val = hashLabel(word);
+    label = label_table[hash_val];
+
+    while (label && strcmp((label->name), word)!= 0)
     {
         label = label->next;
     } 
-    if (!label) {return NULL;}
-    else {return label;}
+    return label;
+}
+
+void printLabelTable() {
+    int i;
+    Label *label;
+    for (i = 0; i < LABEL_HASH_SIZE; i++) {
+        label = label_table[i];
+        if (label) {
+            while (label) {
+                printf("  Label: %s\n", label->name);
+                label = label->next;
+            }
+        }
+    }
 }

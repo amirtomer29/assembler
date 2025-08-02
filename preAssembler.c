@@ -4,25 +4,23 @@
 
 /*loading the files*/
 int preAssembler(char *filename){
+    int error = 0;
     char line[MAX_LINE_LEN+2];
     int line_num = 0;
-    char ch = ' ';
     char *word;
-    int eof;
-    int macroF = 0;
+    Macro *macro = NULL;
     char name[MAX_LABEL_NAME];
+    char new_file_name[FILENAME_MAX];
 
-
-    
-    
     /*loading the files*/
     FILE *src = fopen(filename, "r");
-    FILE *new = fopen("temp.txt", "w");
+    FILE *out = fopen("temp.txt", "w");
 
     /*check error while loading the files*/
-    if (!src||!new) {
+    if (!src||!out) {
         perror("cant open file");
     } else {
+        
         /*main loop - while the file not over*/
         while (fgets(line, MAX_LINE_LEN+2, src) != NULL) /*+2 for \0 and \n*/{
             line_num++;
@@ -30,10 +28,17 @@ int preAssembler(char *filename){
             /*if line excceeds maximum length of line*/
             if (strchr(line, '\n')== NULL) {
                 fprintf(stderr, "Error: line %d excceeds %d charcters", line_num, MAX_LINE_LEN);
+                error = 1;
                 continue;
             } 
             
             word = getWord(line);
+
+            /*if getWord failed*/
+            if(!word){
+                free(word);
+                continue;
+            }
 
             /*if line is comment line skip line*/
             if (word[0] == ';') {
@@ -42,15 +47,21 @@ int preAssembler(char *filename){
             }
 
             /*if line is body line of macro*/
-            if (macroF) {
+            if (macro) {
 
                 /*if line is the end of body line of macro*/
-                if (strncmp(word, "mcroend", 7)== 0) {
-                    macroF = 0;
+                if (strcmp(word, "mcroend")== 0) {
+                    macro = NULL;
+                    if (sscanf(line, "%*s %s", word) == 1) {
+                        fprintf(stderr, "Error: line %d macro %s end line illegal\n", line_num, name);
+                        error = 1;
+                    }
+                    free(word);
+                    continue;
                 }
                 /*if line is body line of macro*/
                  else {
-                    insertLineToMacro(line);
+                    insertLineToMacro(macro, line);
                 }
                 free(word);
                 continue;
@@ -58,27 +69,36 @@ int preAssembler(char *filename){
 
             /*if word is macro*/
             if (checkMacroExist(word)) {
-                fputs(getMacroBody(macro), new);
+                fputs(getMacroBody(word), out);
                 free(word);
                 continue;
             } 
             
             /*if word is labal*/
-            if (line[(strlen(word))+1] == ':'){
+            if (word[strlen(word)-1] == ':'){
+                word[strlen(word)-1] = '\0'; /*remove the ':'*/
                 insertLabelToTbl(word);
-                fputs(line, new);
+                fputs(line, out);
                 free(word);
                 continue;
             } 
 
             /*if line is macro definition line*/
-            if ((strncmp(word, "mcro" , 4))== 0) {
+            if ((strcmp(word, "mcro" ))== 0) {
                 sscanf(line, "%*s %s", name);
-                if (checkMacroName(word)) {
-                    insertMacroNameToTbl(word);
-                    macroF = 1;
+                /*if line is mcro and name only*/
+                if (sscanf(line, "%*s %*s %s", word) == 1) {
+                    fprintf(stderr, "Error: line %d macro %s end line illegal\n", line_num, name);
+                    error = 1;
+                    free(word);
+                    continue;
+                }
+                /*check if macro name is legal*/
+                if (checkMacroName(name)) {
+                    macro = insertMacroNameToTbl(name);
                 } else {
-                    fprintf(stderr, "Error: line %d macro %s name illegal", line_num, word);
+                    fprintf(stderr, "Error: line %d macro %s name illegal\n", line_num, name);
+                    error = 1;  
                 }
                 free(word);
                 continue;
@@ -86,10 +106,39 @@ int preAssembler(char *filename){
 
             /*if line is opcode line*/
             else {
-                fputs(line, new);
+                fputs(line, out);
                 free(word);
             }
         }
+
+        /*finished running in the file*/
+
+        /*if error occured while reading the file*/
+        if (error) {
+            fprintf(stderr, "\nError occured while reading the file %s\n", filename);
+            remove("temp.txt"); /*delete the temp file*/
+        }
+        /*if no error occured while reading the file*/
+        else {
+            /*rename the temp file to the original file name*/
+            strncpy(new_file_name, filename, FILENAME_MAX - 4);
+            new_file_name[FILENAME_MAX - 4] = '\0'; 
+            strcat(new_file_name, ".am");
+            if (rename("temp.txt", new_file_name) != 0) {
+                perror("Error renaming file");
+                remove("temp.txt"); /*delete the temp file*/
+            } else {
+                printf("File %s pre-assembled successfully.\n", filename);
+            }
+        }
+
+    /*print the label and macro tables*/
+    printLabelTable();
+    printMacroTable();
+
+    /*close the files*/
+    fclose(src);
+    fclose(out);
     }
     return 1;
 }
@@ -97,7 +146,7 @@ int preAssembler(char *filename){
 
 int skipSpaces (char *line) {
     int i = 0;
-    while (line[i] == '\t' || line[i] == ' ') {i++};
+    while (line[i] == '\t' || line[i] == ' ') {i++;};
     return i;
 }
 
@@ -105,11 +154,16 @@ char* getWord(char *line){
     int i = skipSpaces(line);
     int start = i;
     int len = 0;
+    char *word = NULL;
+    if (line[i] == '\0' || line[i] == '\n') {
+        return NULL; /*no word found*/
+    }
+    /*find the end of the word*/
     while (line[i] != '\t' && line[i] != ' ' && line[i] != '\n' && line[i] != '\0'){
         i++;
     }
     len = i - start;
-    char *word = malloc(len + 1);
+    word = malloc(len + 1);
     if (!word) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
