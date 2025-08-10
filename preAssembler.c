@@ -2,7 +2,10 @@
 #include "macroTable.h"
 #include "labelTable.h"
 
-/*loading the files*/
+/* preAssembler.c
+ * This file contains the implementation of the pre-assembler functionality.
+ * It processes the input assembly files, handles macros, and manages labels.
+ */
 int preAssembler(char *filename){
     int error = 0;
     char line[MAX_LINE_LEN+2];
@@ -52,8 +55,9 @@ int preAssembler(char *filename){
                 /*if line is the end of body line of macro*/
                 if (strcmp(word, "mcroend")== 0) {
                     macro = NULL;
+                    /*if there is somthing after mcroend its error*/
                     if (sscanf(line, "%*s %s", word) == 1) {
-                        fprintf(stderr, "Error: line %d macro %s end line illegal\n", line_num, name);
+                        fprintf(stderr, "Error: line %d macro %s end of line illegal\n", line_num, name);
                         error = 1;
                     }
                     free(word);
@@ -77,34 +81,33 @@ int preAssembler(char *filename){
             /*if word is labal*/
             if (word[strlen(word)-1] == ':'){
                 word[strlen(word)-1] = '\0'; /*remove the ':'*/
-                insertLabelToTbl(word);
+                insertLabelToTbl(word, line_num);
                 fputs(line, out);
                 free(word);
                 continue;
             } 
 
             /*if line is macro definition line*/
-            if ((strcmp(word, "mcro" ))== 0) {
+            if ((strcmp(word, "mcro" )) == 0) {
                 sscanf(line, "%*s %s", name);
-                /*if line is mcro and name only*/
+                /*if line is not mcro and name only its error*/
                 if (sscanf(line, "%*s %*s %s", word) == 1) {
-                    fprintf(stderr, "Error: line %d macro %s end line illegal\n", line_num, name);
+                    fprintf(stderr, "Error: line %d macro %s end of line illegal\n", line_num, name);
                     error = 1;
                     free(word);
                     continue;
                 }
                 /*check if macro name is legal*/
-                if (checkMacroName(name)) {
+                if (checkMacroName(name, line_num)) {
                     macro = insertMacroNameToTbl(name);
                 } else {
-                    fprintf(stderr, "Error: line %d macro %s name illegal\n", line_num, name);
                     error = 1;  
                 }
                 free(word);
                 continue;
             }
 
-            /*if line is opcode line*/
+            /*if line is instruction or opcode line*/
             else {
                 fputs(line, out);
                 free(word);
@@ -143,13 +146,17 @@ int preAssembler(char *filename){
     return 1;
 }
 
-
+/* Function to skip spaces in a line
+// Returns the number of spaces skipped*/
 int skipSpaces (char *line) {
     int i = 0;
     while (line[i] == '\t' || line[i] == ' ') {i++;};
     return i;
 }
 
+/* Function to get a word from a line
+// Returns a dynamically allocated string containing the word,
+or NULL if no word is found */
 char* getWord(char *line){
     int i = skipSpaces(line);
     int start = i;
@@ -166,31 +173,11 @@ char* getWord(char *line){
     word = malloc(len + 1);
     if (!word) {
         fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
+        return NULL;
     }
     strncpy(word, &line[start], len);
     word[len] = '\0';
     return word;
 }
 
-
-
- 
-
-/*read line after line*/
-
-/*check if the first field is name of macro,
-if yes - copy from the macros table  the lines
-*/
-
-
-/*check if the first field is new macro
-1. switch macro flag on,
-2. enter to the macros table the name of the macro.
-3. read lines until 'mcroend'.
-4. delete the macro from the file.
-5. switch macro flag off.
-*/
-
-/*save to new file*/
 

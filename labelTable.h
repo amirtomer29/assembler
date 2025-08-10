@@ -11,6 +11,7 @@
 typedef struct Label {
     char *name;
     char *type;
+    char *location; /*location of the label in the file*/
     struct Label *next;
 } Label;
 

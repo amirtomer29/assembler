@@ -23,4 +23,6 @@ void insertLineToMacro(Macro *macro, char* line);
 void initialMacroTable ();
 
 void printMacroTable() ;
+
+
 #endif /* MACRO_TABLE_H */

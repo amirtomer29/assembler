@@ -8,6 +8,7 @@
         "typeinfo": "c",
         "stdio.h": "c",
         "labeltable.h": "c",
-        "macrotable.h": "c"
+        "macrotable.h": "c",
+        "firstpass.h": "c"
     }
 }

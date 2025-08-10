@@ -15,8 +15,15 @@
 /*declarations*/
 extern const char *opcode_names[];
 extern const char *instruction_names[];
+
 extern Macro *macro_table[MACRO_HASH_SIZE];
 extern Label *label_table[LABEL_HASH_SIZE];
+
+extern int IC; /*instruction counter*/
+extern int DC; /*data counter*/
+
+extern char[156] instructions_coded;    /*array of instructions coded in the file, used in firstPass.c*/
+extern char[100] data_coded;      /*array of data coded in the file, used in firstPass.c*/
 
 /*opcode enum*/
 typedef enum {
@@ -37,6 +44,19 @@ typedef enum {
     rts,
     stop
 } opcode;
+
+/*registers enum*/
+typedef enum {
+    r0=0,
+    r1,
+    r2,
+    r3,
+    r4,
+    r5,
+    r6,
+    r7
+} registers;
+
 
 
 
