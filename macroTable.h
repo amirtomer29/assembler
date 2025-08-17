@@ -1,7 +1,11 @@
 #ifndef MACRO_TABLE_H
 #define MACRO_TABLE_H
 
-#define MACRO_HASH_SIZE 31
+
+
+
+
+
 
 typedef struct Macro {
     char *name;
@@ -14,7 +18,7 @@ char* getMacroBody (char *name);
 
 Macro *checkMacroExist(char *word);
 
-int checkMacroName(char *word);
+int checkMacroName(char *word, int line_num);
 
 Macro *insertMacroNameToTbl(const char *word);
 

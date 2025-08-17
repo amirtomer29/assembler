@@ -1,29 +1,35 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "preAssembler.h"
-#include "macroTable.h"
-#include "labelTable.h"
 
 
 #define MAX_NAME_LEN 30 /*arbituary*/
 #define MAX_MACRO_LINES 20 /*arbituary*/
 #define MAX_LINE_LEN 81 /*page 37*/
 #define MAX_LABEL_NAME 30 /*page 40*/
+#define MACRO_HASH_SIZE 31 /*arbituary*/
+#define LABEL_HASH_SIZE 31 /*arbituary*/
+#define ADRRESS_SIZE 5
+#define REAL_MEMORY_LOAD 100
+
+
 
 
 /*declarations*/
+struct Macro;
+struct Label;
+
 extern const char *opcode_names[];
 extern const char *instruction_names[];
 
-extern Macro *macro_table[MACRO_HASH_SIZE];
-extern Label *label_table[LABEL_HASH_SIZE];
+extern struct Macro *macro_table[MACRO_HASH_SIZE];
+extern struct Label *label_table[LABEL_HASH_SIZE];
 
 extern int IC; /*instruction counter*/
 extern int DC; /*data counter*/
 
-extern char[156] instructions_coded;    /*array of instructions coded in the file, used in firstPass.c*/
-extern char[100] data_coded;      /*array of data coded in the file, used in firstPass.c*/
+extern char *memory_d[256];    /*array of instructions coded in the file, used in firstPass.c*/
+extern char *memory_c[256]; 
 
 /*opcode enum*/
 typedef enum {

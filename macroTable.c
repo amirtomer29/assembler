@@ -1,6 +1,12 @@
-#include "macroTable.h"
-#include "labelTable.h"
+
 #include "preAssembler.h"
+#include "labelTable.h"
+#include "instructions.h"
+#include "main.h"
+#include "macroTable.h"
+
+
+
 
 /* macroTable.c
  * This file contains the implementation of the macro table functionality.
@@ -78,7 +84,7 @@ void insertLineToMacro(Macro *macro, char* line){
     } else {
         macro->body = temp;
         strcat(macro->body, line);
-        strcat(macro->body, "\n");
+
     }
 }
 
@@ -124,19 +130,24 @@ Macro *checkMacroExist(char *word) {
 // The function does not check if the macro name is NULL, which should be handled by the caller
 */
 int checkMacroName(char *word, int line_num) {
-    int i;
-    for (i = 0; i<16; i++){
-        if (strcmp(word, opcode_names[i]) == 0 ) {
-            fprintf(stderr, "Error: line %d macro %s name already used as op_code\n", line_num, name);
-            return 0;
-        }
+    if (checkIfOpCode(word) != -1) {
+        fprintf(stderr, "Error: line %d macro %s name already used as opcode name\n", line_num, word);
+        return 0;
     }
     if (checkLabelExist(word)) {
-        fprintf(stderr, "Error: line %d macro %s name already used as label name\n", line_num, name);
+        fprintf(stderr, "Error: line %d macro %s name already used as label name\n", line_num, word);
         return 0;
     }
     if (checkMacroExist(word)) {
-        fprintf(stderr, "Error: line %d macro %s name already used as macro name\n", line_num, name);
+        fprintf(stderr, "Error: line %d macro %s name already used as macro name\n", line_num, word);
+        return 0;
+    }
+    if (getInstructionType(word) != -1) {
+        fprintf(stderr, "Error: line %d macro %s name already used as instruction name\n", line_num, word);
+        return 0;
+    }
+    if (checkIfRegister(word)) {
+        fprintf(stderr, "Error: line %d macro %s name already used as register name\n", line_num, word);
         return 0;
     }
     return 1;

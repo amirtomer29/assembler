@@ -9,6 +9,17 @@
         "stdio.h": "c",
         "labeltable.h": "c",
         "macrotable.h": "c",
-        "firstpass.h": "c"
+        "firstpass.h": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "opcode.h": "c",
+        "instructions.h": "c",
+        "main.h": "c",
+        "ctype.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "secondpass.h": "c",
+        "format.h": "c",
+        "parsers.h": "c"
     }
 }

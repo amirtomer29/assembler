@@ -4,14 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MAX_LABEL_TYPE_NAME 10
+#define MAX_EXTERN_APEARS 30
 
-#define LABEL_HASH_SIZE 31
-#define MAX_LABEL_LEN 30
+
+
 
 typedef struct Label {
     char *name;
     char *type;
-    char *location; /*location of the label in the file*/
+    int location; /*location of the label in the file*/
+    int extern_locatoins[MAX_EXTERN_APEARS];
+    int extern_locatins_num;
     struct Label *next;
 } Label;
 
@@ -21,10 +25,14 @@ void initialLabelTable ();
 
 unsigned int hashLabel (const char* str);
 
-void insertLabelToTbl (const char* name);
+int insertLabelToTbl (char* name, int line_num);
 
 Label* checkLabelExist(char *word);
 
 void printLabelTable();
+
+char* trim_whitespace(char *str);
+
+void updateDataLabelsLocations(int size_ic);
 
 #endif /* LABEL_TABLE_H */

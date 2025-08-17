@@ -9,11 +9,9 @@
 #define MAFILENAME_MAX 100
 
 /*function declaration*/
-int preAssembler(char *filename);
+char* preAssembler(char *filename);
 
-int skipSpaces (char *line);
-
-char* getWord(char *line);
+int checkIfRegister(char *word);
 
 #endif /* PRE_ASSEMBLER_H */
 
